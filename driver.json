@@ -1,0 +1,46 @@
+{
+  "driver_id": "mpchc_driver",
+  "version": "1.0.0",
+  "min_core_api": "0.20.0",
+  "name": {
+    "en": "MPC-HC"
+  },
+  "icon":"custom:mpchc.png",
+  "description": {
+    "en": "Control your MPC-HC instances with Remote Two/3.",
+    "de": "Steuere MPC-HC instances mit Remote Two/3.",
+    "fr": "Contrôler vos instances MPC-HC avec Remote Two/3."
+  },
+  "developer": {
+    "name": "Albaintor",
+    "email": "albaintor@github.com",
+    "url": "https://github.com/albaintor"
+  },
+  "home_page": "https://github.com/albaintor/integration-mpchc",
+  "setup_data_schema": {
+    "title": {
+      "en": "Integration setup",
+      "de": "Integrations setup",
+      "fr": "Configuration de l'intégration"
+    },
+    "settings": [
+      {
+        "id": "info",
+        "label": {
+          "en": "Setup process",
+          "de": "Setup Fortschritt",
+          "fr": "Avancement de la configuration"
+        },
+        "field": {
+          "label": {
+            "value": {
+              "en": "The integration will let you configure your MPC-HC instances on your network.",
+              "fr": "Cette intégration permet de configurer vos instances MPC-HC dans le réseau."
+            }
+          }
+        }
+      }
+    ]
+  },
+  "release_date": "2025-11-22"
+}
