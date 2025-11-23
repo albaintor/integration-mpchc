@@ -101,6 +101,8 @@ class MPCHCMediaPlayer(MediaPlayer):
             res = await self._device.previous_track()
         elif cmd_id == Commands.PLAY_PAUSE:
             res = await self._device.play_pause()
+        elif cmd_id == Commands.STOP:
+            res = await self._device.stop()
         elif cmd_id == Commands.FAST_FORWARD:
             res = await self._device.send_command(MPCHCCommands.STEP_FORWARD_MEDIUM)
         elif cmd_id == Commands.REWIND:
