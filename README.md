@@ -7,14 +7,38 @@ The driver lets configure your MPC-HC instances. A media player and a remote ent
 Note : this release requires remote firmware `>= 1.7.10`
 
 ### Supported attributes
-- To be completed
+- Media title
+- Media artist (audio track and subtitle track names)
+- Media position / duration
+- Media state
 
 
 ### Supported commands for Media Player entity
-- To be completed
+- On/Off (only off is possible that will quit the application)
+- Volume set by level
+- Volume Up/Down
+- Mute toggle
+- Play, Play/pause, Pause, Stop
+- Direction pad
+- Fast forward / Rewind
+- Next / Previous chapter
+- Menu, Settings, Home, Info, Context Menu
+- Next audio track
+- Next subtitle track
+- Media seek
+
+
+### Supported commands for Remote entity
+- Turn off (exits MPC-HC)
+- Send command (see the list below)
+- Command sequence (see the list below)
 
 
 ## Installation
+
+Pre-requisite : enable the webserver in MPC-HC configuration :
+<img width="646" height="488" alt="image" src="https://github.com/user-attachments/assets/61147eb2-c982-4425-bee9-9d8204b381a8" />
+
 
 - First [go to the release section](https://github.com/albaintor/integration-mpchc/releases) and download the `xxx_aarch64-xxx.tar.gz` file
 - On the Web configurator of your remote, go to the `Integrations` tab, click on `Add new` and select `Install custom`
@@ -39,6 +63,155 @@ To use this functionality, select the "Backup or restore" option in the setup fl
 - Restore : just replace the content by the previously saved configuration and click on next to apply it. Beware while using this functionality : the expected format should be respected and could change in the future.
 If the format is not recognized, the import will be aborted and existing configuration will remain unchanged.
 
+
+## Available commands for the remote entity
+
+The following commands can be set in the `Send command` or `Command sequenc` commands of the `Remote` entity :<br>
+
+| Command                | Description |
+|------------------------|-------------|
+|AUDIO_DELAY_DECREASE | |
+|AUDIO_DELAY_INCREASE | |
+|AUDIO_TRACK_NEXT | |
+|AUDIO_TRACK_PREV | |
+|BOOKMARK_ADD | |
+|BRIGHTNESS_DOWN | |
+|BRIGHTNESS_UP | |
+|CLOSE | |
+|COLORS_RESET | |
+|CONTRAST_DOWN | |
+|CONTRAST_UP | |
+|CURSOR_CENTER | |
+|CURSOR_DOWN | |
+|CURSOR_LEFT | |
+|CURSOR_RIGHT | |
+|CURSOR_UP | |
+|EXIT | |
+|GOTO | |
+|GOTO_START | |
+|LOAD_SUBTITLES_EXT | |
+|MENU_AUDIO | |
+|MENU_BOOKMARK | |
+|MENU_DVD_ANGLE | |
+|MENU_DVD_AUDIO | |
+|MENU_DVD_BACK | |
+|MENU_DVD_CHAPTERS | |
+|MENU_DVD_DOWN | |
+|MENU_DVD_EXIT | |
+|MENU_DVD_LEFT | |
+|MENU_DVD_MAIN | |
+|MENU_DVD_RIGHT | |
+|MENU_DVD_SELECT | |
+|MENU_DVD_SUBTITLES | |
+|MENU_DVD_TITLE | |
+|MENU_DVD_UP | |
+|MENU_GOTO | |
+|MENU_HISTORY | |
+|MENU_OPTIONS | |
+|MENU_OSD_CURRENTFILE | |
+|MENU_OSD_LOCALTIME | |
+|MENU_OSD_TIMELEFT | |
+|MENU_RECENT_FILES | |
+|MENU_SUBTITLES | |
+|NEXT | |
+|NEXT_FILE | |
+|NEXT_KEY_PICTURE | |
+|NEXT_PICTURE | |
+|OPEN_DEVICE | |
+|OPEN_DVD | |
+|OPEN_FILE | |
+|OPEN_FILE_QUICK | |
+|OPEN_FOLDER | |
+|OPEN_ISO_FILE | |
+|PAUSE | |
+|PLAY | |
+|PLAY_PAUSE | |
+|PREVIOUS | |
+|PREVIOUS_FILE | |
+|PREVIOUS_KEY_PICTURE | |
+|PREVIOUS_PICTURE | |
+|PROPERTIES | |
+|REPEAT | |
+|RESUME_FILE | |
+|SATURATION_DOWN | |
+|SATURATION_UP | |
+|SAVE_AS | |
+|SAVE_DISP_PICT_AUTO | |
+|SAVE_PICTURE | |
+|SAVE_PICTURE_AUTO | |
+|SAVE_PICTURE_CLIPB | |
+|SAVE_SUBTITLES | |
+|SAVE_THUMBS | |
+|SHOW_CONTROLBAR | |
+|SHOW_HEADER_MENUS | |
+|SHOW_OSD | |
+|SHOW_PLAYLIST | |
+|SHOW_STATS | |
+|SHOW_STATUS | |
+|SHOW_STATUSBAR | |
+|SPEED_DOWN | |
+|SPEED_NORMAL | |
+|SPEED_UP | |
+|STEP_BACKWARD | |
+|STEP_BACKWARD_LARGE | |
+|STEP_BACKWARD_MEDIUM | |
+|STEP_FORWARD | |
+|STEP_FORWARD_LARGE | |
+|STEP_FORWARD_MEDIUM | |
+|STOP | |
+|SUBTITLES_DELAY_DOWN | |
+|SUBTITLES_DELAY_UP | |
+|SUBTITLES_DOWN | |
+|SUBTITLES_LEFT | |
+|SUBTITLES_NEXT | |
+|SUBTITLES_NEXT2 | |
+|SUBTITLES_OFFSET_LEFT | |
+|SUBTITLES_OFFSET_RIGHT | |
+|SUBTITLES_PREVIOUS | |
+|SUBTITLES_PREVIOUS2 | |
+|SUBTITLES_RELOAD | |
+|SUBTITLES_RESETPOS | |
+|SUBTITLES_RIGHT | |
+|SUBTITLES_SIZE_DOWN | |
+|SUBTITLES_SIZE_UP | |
+|SUBTITLES_SYNC | |
+|SUBTITLES_TOGGLE | |
+|SUBTITLES_UP | |
+|VIEW_ADJUST | |
+|VIEW_ADJUST_INSIDE | |
+|VIEW_ADJUST_OUTSIDE | |
+|VIEW_ALWAYS_ONTOP | |
+|VIEW_COMPACT | |
+|VIEW_DOUBLE | |
+|VIEW_FULLSCREEN | |
+|VIEW_FULLSCREEN_KEEP | |
+|VIEW_HALF | |
+|VIEW_MINIMAL | |
+|VIEW_MOVE_MAINSCREEN | |
+|VIEW_NEXT | |
+|VIEW_NORMAL | |
+|VIEW_ORIGIN | |
+|VIEW_PIVOTE_CLOCKWISE | |
+|VIEW_PIVOTE_FLIP | |
+|VIEW_PIVOTE_INV_CLOCKW | |
+|VIEW_RESET | |
+|VIEW_SWAP_VIDEO | |
+|VIEW_VIDEO1 | |
+|VIEW_VIDEO2 | |
+|VIEW_ZOOM_100 | |
+|VIEW_ZOOM_200 | |
+|VIEW_ZOOM_50 | |
+|VIEW_ZOOM_AUTO | |
+|VOLUME_AUTO | |
+|VOLUME_CENTER_DOWN | |
+|VOLUME_CENTER_UP | |
+|VOLUME_DOWN | |
+|VOLUME_GAIN_DOWN | |
+|VOLUME_GAIN_MAX | |
+|VOLUME_GAIN_OFF | |
+|VOLUME_GAIN_UP | |
+|VOLUME_MUTE | |
+|VOLUME_UP | |
 
 ## Installation as external integration
 
