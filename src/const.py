@@ -18,6 +18,7 @@ from ucapi.ui import Buttons, DeviceButtonMapping, EntityCommand
 SCAN_INTERVAL = 10
 DEFAULT_NAME = "MPC-HC"
 DEFAULT_PORT = 13579
+DEFAULT_VOLUME_STEP = 2
 
 
 @dataclass

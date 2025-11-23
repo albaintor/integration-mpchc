@@ -427,7 +427,12 @@ async def _handle_discovery(msg: UserDataResponse) -> RequestUserInput | SetupEr
         },
         [
             {
-                "field": {"text": {"value": address}},
+                "field": {"label": {"value": {"en": friendly_name}}},
+                "id": "info",
+                "label": {"en": "Information", "fr": "Information"},
+            },
+            {
+                "field": {"label": {"value": {"en": address}}},
                 "id": "address",
                 "label": {"en": "IP address", "de": "IP-Adresse", "fr": "Adresse IP"},
             },
@@ -437,7 +442,7 @@ async def _handle_discovery(msg: UserDataResponse) -> RequestUserInput | SetupEr
                     "en": "Port number",
                     "fr": "Numéro de port",
                 },
-                "field": {"text": {"value": str(port)}},
+                "field": {"label": {"value": {"en": str(port)}}},
             },
             {
                 "id": "refresh_frequency",

@@ -7,6 +7,7 @@ Remote entity functions.
 
 import asyncio
 import logging
+from asyncio import shield
 from typing import Any
 
 from ucapi import EntityTypes, Remote, StatusCodes
@@ -29,15 +30,26 @@ REMOTE_STATE_MAPPING = {
     States.PAUSED: RemoteStates.ON,
 }
 
+COMMAND_TIMEOUT = 4.5
 
-class OrangeRemote(Remote):
-    """Representation of a Kodi Media Player entity."""
+
+def get_int_param(param: str, params: dict[str, Any], default: int):
+    """Parse integer parameter value from given parameter."""
+    # TODO bug to be fixed on UC Core : some params are sent as (empty) strings by remote (hold == "")
+    value = params.get(param, default)
+    if isinstance(value, str) and len(value) > 0:
+        return int(float(value))
+    return default
+
+
+class MPCHCRemote(Remote):
+    """Representation of a MPCHC Remote entity."""
 
     # pylint: disable=R0801
     def __init__(self, config_device: DeviceInstance, device: client.MPCHCClient):
         """Initialize the class."""
         self._device = device
-        _LOG.debug("OrangeRemote init")
+        _LOG.debug("MPCHCRemote init")
         entity_id = create_entity_id(config_device.id, EntityTypes.REMOTE)
         features = [Features.SEND_CMD, Features.ON_OFF]
         attributes = {
@@ -51,14 +63,6 @@ class OrangeRemote(Remote):
             button_mapping=REMOTE_BUTTONS_MAPPING,
             # ui_pages=REMOTE_UI_PAGES,
         )
-
-    def get_int_param(self, param: str, params: dict[str, Any], default: int):
-        """Parse integer parameter value from given parameter."""
-        # TODO bug to be fixed on UC Core : some params are sent as (empty) strings by remote (hold == "")
-        value = params.get(param, default)
-        if isinstance(value, str) and len(value) > 0:
-            return int(float(value))
-        return default
 
     async def command(self, cmd_id: str, params: dict[str, Any] | None = None) -> StatusCodes:
         """
@@ -76,34 +80,53 @@ class OrangeRemote(Remote):
             _LOG.warning("No instance for entity: %s", self.id)
             return StatusCodes.SERVICE_UNAVAILABLE
 
-        repeat = self.get_int_param("repeat", params, 1)
+        # Occurs when the user press a button after wake up from standby and
+        # the driver reconnection is not triggered yet
+        if not self._device.connected:
+            await self._device.connect()
+
         res = StatusCodes.OK
-        for _i in range(0, repeat):
-            res = await self.handle_command(cmd_id, params)
-        return res
-
-    async def handle_command(self, cmd_id: str, params: dict[str, Any] | None = None) -> StatusCodes:
-        """Handle command."""
-        # pylint: disable=R0911,R0903
-        # hold = self.get_int_param("hold", params, 0)
-        delay = self.get_int_param("delay", params, 0)
-        command = params.get("command", "")
-
         if cmd_id == Commands.OFF:
-            return await self._device.exit()
-        if cmd_id == Commands.SEND_CMD and command in MPCHCCommands:
-            return await self._device.send_command(MPCHCCommands[command])
-        if cmd_id == Commands.SEND_CMD_SEQUENCE:
-            commands = params.get("sequence", [])  # .split(",")
-            res = StatusCodes.OK
-            for command in commands:
-                res = await self.handle_command(Commands.SEND_CMD, {"command": command, "params": params})
-                if delay > 0:
-                    await asyncio.sleep(delay)
+            res = await self._device.exit()
+        elif cmd_id in [Commands.SEND_CMD, Commands.SEND_CMD_SEQUENCE]:
+            # If the duration exceeds the remote timeout, keep it running and return immediately
+            try:
+                async with asyncio.timeout(COMMAND_TIMEOUT):
+                    res = await shield(self.send_commands(cmd_id, params))
+            except asyncio.TimeoutError:
+                _LOG.info("[%s] Command request timeout, keep running: %s %s", self.id, cmd_id, params)
         else:
             return StatusCodes.NOT_IMPLEMENTED
-        if delay > 0 and cmd_id != Commands.SEND_CMD_SEQUENCE:
-            await asyncio.sleep(delay)
+        return res
+
+    async def send_commands(self, cmd_id: str, params: dict[str, Any] | None = None) -> StatusCodes:
+        """Handle custom command or commands sequence."""
+        # hold = get_int_param("hold", params, 0)
+        delay = get_int_param("delay", params, 0)
+        repeat = get_int_param("repeat", params, 1)
+        command = params.get("command", "")
+        res: StatusCodes = StatusCodes.OK
+        for _i in range(0, repeat):
+            if cmd_id == Commands.SEND_CMD:
+                if command in MPCHCCommands:
+                    result: StatusCodes = await self._device.send_command(MPCHCCommands[command])
+                else:
+                    result = StatusCodes.NOT_IMPLEMENTED
+                if result != StatusCodes.OK:
+                    res = result
+                if delay > 0:
+                    await asyncio.sleep(delay / 1000)
+            else:
+                commands = params.get("sequence", [])
+                for command in commands:
+                    if command in MPCHCCommands:
+                        result: StatusCodes = await self._device.send_command(MPCHCCommands[command])
+                    else:
+                        result = StatusCodes.NOT_IMPLEMENTED
+                    if result != StatusCodes.OK:
+                        res = result
+                    if delay > 0:
+                        await asyncio.sleep(delay / 1000)
         return res
 
     def filter_changed_attributes(self, update: dict[str, Any]) -> dict[str, Any]:
@@ -119,7 +142,7 @@ class OrangeRemote(Remote):
             state = REMOTE_STATE_MAPPING.get(update[Attributes.STATE])
             attributes = self._key_update_helper(Attributes.STATE, state, attributes)
         if attributes:
-            _LOG.debug("Orange remote update attributes %s -> %s", update, attributes)
+            _LOG.debug("MPCHC remote update attributes %s -> %s", update, attributes)
         return attributes
 
     def _key_update_helper(self, key: str, value: str | None, attributes):

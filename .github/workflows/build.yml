@@ -1,4 +1,4 @@
-# GitHub Action to build a self-contained binary of the Kodi Python driver and Docker images
+# GitHub Action to build a self-contained binary of the MPC-HC Python driver and Docker images
 ---
 name: "Build & Release"
 
@@ -12,13 +12,13 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  INTG_NAME: kodi
+  INTG_NAME: mpchc
   HASH_FILENAME: uc-src.hash
   # Python version to use in the builder image. See https://hub.docker.com/r/unfoldedcircle/r2-pyinstaller for possible versions.
   PYTHON_VER: 3.11.6-0.2.0
   # Docker configuration
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ github.repository_owner }}/kodi-integration
+  IMAGE_NAME: ${{ github.repository_owner }}/mpchc-integration
 
 jobs:
   build:
@@ -95,7 +95,7 @@ jobs:
         run: |
           cp -r dist/driver/* artifacts/bin
           cp driver.json artifacts/
-          cp kodi.png artifacts/
+          cp mpchc.png artifacts/
           echo "ARTIFACT_NAME=uc-intg-${{ env.INTG_NAME }}-${{ env.VERSION }}-${{ matrix.platform }}" >> $GITHUB_ENV
           
       - name: Create upload artifact
@@ -151,7 +151,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/kodi-integration:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mpchc-integration:latest
       
       #- name: Build and push Docker image
       #  uses: docker/build-push-action@v5

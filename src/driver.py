@@ -34,7 +34,8 @@ asyncio.set_event_loop(_LOOP)
 api = ucapi.IntegrationAPI(_LOOP)
 # Map of device_id -> MPCHCClient instance
 _configured_devices: dict[str, MPCHCClient] = {}
-_R2_IN_STANDBY = False
+# pylint: disable=C0103
+_REMOTE_IN_STANDBY = False
 
 
 @api.listens_to(ucapi.Events.CONNECT)
@@ -63,8 +64,8 @@ async def on_r2_enter_standby() -> None:
 
     Disconnect every MPC-HC instances.
     """
-    global _R2_IN_STANDBY
-    _R2_IN_STANDBY = True
+    global _REMOTE_IN_STANDBY
+    _REMOTE_IN_STANDBY = True
     _LOG.debug("Enter standby event: disconnecting device(s)")
     for device in _configured_devices.values():
         # start background task
@@ -78,9 +79,9 @@ async def on_r2_exit_standby() -> None:
 
     Connect all MPC-HC instances.
     """
-    global _R2_IN_STANDBY
+    global _REMOTE_IN_STANDBY
 
-    _R2_IN_STANDBY = False
+    _REMOTE_IN_STANDBY = False
     _LOG.debug("Exit standby event: connecting device(s)")
 
     for device in _configured_devices.values():
@@ -96,9 +97,9 @@ async def on_subscribe_entities(entity_ids: list[str]) -> None:
 
     :param entity_ids: entity identifiers.
     """
-    global _R2_IN_STANDBY
+    global _REMOTE_IN_STANDBY
 
-    _R2_IN_STANDBY = False
+    _REMOTE_IN_STANDBY = False
     _LOG.debug("Subscribe entities event: %s", entity_ids)
     for entity_id in entity_ids:
         entity = api.configured_entities.get(entity_id)
@@ -106,10 +107,10 @@ async def on_subscribe_entities(entity_ids: list[str]) -> None:
         if device_id in _configured_devices:
             device = _configured_devices[device_id]
             attributes = device.attributes
-            if isinstance(entity, media_player.OrangeMediaPlayer):
+            if isinstance(entity, media_player.MPCHCMediaPlayer):
                 _LOG.debug("Subscribe entity %s, attributes : %s", entity_id, attributes)
                 api.configured_entities.update_attributes(entity_id, attributes)
-            if isinstance(entity, remote.OrangeRemote):
+            if isinstance(entity, remote.MPCHCRemote):
                 # Remote entity : only attribute is the remote's state
                 entity_attributes = {
                     ucapi.remote.Attributes.STATE: remote.REMOTE_STATE_MAPPING.get(
@@ -250,15 +251,7 @@ async def on_avr_update(device_id: str, update: dict[str, Any] | None) -> None:
         if device_id not in _configured_devices:
             return
         device = _configured_devices[device_id]
-        update = {
-            MediaAttr.STATE: device.state,
-            MediaAttr.MEDIA_TITLE: device.media_title,
-            MediaAttr.MEDIA_ARTIST: device.media_artist,
-            MediaAttr.MEDIA_POSITION: device.media_position,
-            MediaAttr.MEDIA_DURATION: device.media_duration,
-            MediaAttr.MEDIA_TYPE: device.media_type,
-            MediaAttr.MEDIA_POSITION_UPDATED_AT: device.media_position_updated_at,
-        }
+        update = device.attributes
     else:
         _LOG.info("[%s] MPC-HC update: %s", device_id, update)
 
@@ -270,9 +263,9 @@ async def on_avr_update(device_id: str, update: dict[str, Any] | None) -> None:
         if configured_entity is None:
             return
 
-        if isinstance(configured_entity, media_player.OrangeMediaPlayer):
+        if isinstance(configured_entity, media_player.MPCHCMediaPlayer):
             attributes = update
-        elif isinstance(configured_entity, remote.OrangeRemote):
+        elif isinstance(configured_entity, remote.MPCHCRemote):
             attributes = configured_entity.filter_changed_attributes(update)
 
         if attributes:
@@ -327,7 +320,7 @@ def _register_available_entities(config_device: config.DeviceInstance, device: M
     """
     # plain and simple for now: only one media_player per AVR device
     # entity = media_player.create_entity(device)
-    entities = [media_player.OrangeMediaPlayer(config_device, device), remote.OrangeRemote(config_device, device)]
+    entities = [media_player.MPCHCMediaPlayer(config_device, device), remote.MPCHCRemote(config_device, device)]
     for entity in entities:
         if api.available_entities.contains(entity.id):
             api.available_entities.remove(entity.id)

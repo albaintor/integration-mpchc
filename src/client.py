@@ -79,7 +79,7 @@ class MPCHCClient:
         self.hostname = device_config.address
         self.port = device_config.port
         self._device_config = device_config
-        self.timeout = 3
+        self._timeout = 3
         self._media_type = MediaType.VIDEO
         self._media_title = ""
         self._state = States.UNKNOWN
@@ -112,7 +112,7 @@ class MPCHCClient:
         if self._session:
             await self._session.close()
             self._session = None
-        session_timeout = aiohttp.ClientTimeout(total=None, sock_connect=self.timeout, sock_read=self.timeout)
+        session_timeout = aiohttp.ClientTimeout(total=None, sock_connect=self._timeout, sock_read=self._timeout)
         # connector = aiohttp.TCPConnector(ssl=False)
         self._session = aiohttp.ClientSession(timeout=session_timeout, raise_for_status=True, trust_env=True)
         self.events.emit(Events.CONNECTED, self.id)
@@ -300,6 +300,11 @@ class MPCHCClient:
         return self._state
 
     @property
+    def connected(self) -> bool:
+        """Connection state."""
+        return self._connected
+
+    @property
     def url(self):
         """Return formatted URL."""
         return f"http://{self._device_config.address}:{self._device_config.port}"
@@ -387,6 +392,12 @@ class MPCHCClient:
     async def volume_down(self):
         """Volume down media player."""
         await self._send_command(MPCHCCommands.VOLUME_DOWN)
+
+    @cmd_wrapper
+    async def set_volume(self, volume: int):
+        """Set volume level."""
+        params = {"wm_command": -2, "volume": volume}
+        await self._send_command_params(params)
 
     @cmd_wrapper
     async def mute_volume(self):

@@ -22,8 +22,8 @@ from const import MPCHCCommands
 _LOG = logging.getLogger(__name__)
 
 
-class OrangeMediaPlayer(MediaPlayer):
-    """Representation of a Sony Media Player entity."""
+class MPCHCMediaPlayer(MediaPlayer):
+    """Representation of a MPCHC Media Player entity."""
 
     # pylint: disable=R0915,R0903
     def __init__(self, config_device: DeviceInstance, device: MPCHCClient):
@@ -88,6 +88,8 @@ class OrangeMediaPlayer(MediaPlayer):
             res = await self._device.volume_up()
         elif cmd_id == Commands.VOLUME_DOWN:
             res = await self._device.volume_down()
+        elif cmd_id == Commands.VOLUME:
+            res = await self._device.set_volume(params.get("volume", 0))
         elif cmd_id == Commands.MUTE_TOGGLE:
             res = await self._device.mute_volume()
         elif cmd_id == Commands.OFF:
