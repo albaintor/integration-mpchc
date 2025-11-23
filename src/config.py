@@ -192,16 +192,14 @@ class Devices:
 
     def export(self) -> str:
         """
-        Export the configuration file to a string
+        Export the configuration file to a string.
 
         :return: JSON formatted string of the current configuration
         """
         return json.dumps(self._config, ensure_ascii=False, cls=_EnhancedJSONEncoder)
 
     def import_config(self, updated_config: str) -> bool:
-        """
-        Import the updated configuration
-        """
+        """Import the updated configuration."""
         config_backup = self._config.copy()
         try:
             data = json.loads(updated_config)
